@@ -33,6 +33,7 @@ codeunit 50111 "Send Invoice Emails"
         Customer: Record Customer;
     begin
         SalesInvHeader.RESET;
+        SalesInvHeader.SetRange(IsSendMail, false);
         if SalesInvHeader.FINDSET then
             repeat
                 if SalesInvHeader."Posting Date" <= WORKDATE - 30 then // Son 30 gün içindeki faturalar
@@ -43,7 +44,10 @@ codeunit 50111 "Send Invoice Emails"
                     SalesInvHeader.SetRecFilter();
 
                     if SendEmailToCustomer(SalesInvHeader) then begin
+                        //Başarılı Gönderim Logunu Kaydet
                         InsertLogEntry(SalesInvHeader."No.", CustomerNo, Email, 0);
+                        SalesInvHeader.IsSendMail := true;
+                        SalesInvHeader.Modify();
                     end
                     else begin
                         // Başarısız gönderim logunu kaydet
